@@ -1,0 +1,15 @@
+version: '3'
+
+volumes:
+  database:
+
+services:
+  database:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: app
+    ports:
+      - 3306:3306
+    volumes:
+      - database:/var/lib/mysql
