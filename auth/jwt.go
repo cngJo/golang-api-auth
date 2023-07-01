@@ -15,8 +15,8 @@ type JWTClaim struct {
 	jwt.StandardClaims
 }
 
-func GenerateJWT(email string, username string) (tokenString string, err error) {
-	expirationTime := time.Now().Add(1 * time.Hour)
+func GenerateJWT(email string, username string, expiration time.Duration) (tokenString string, err error) {
+	expirationTime := time.Now().Add(expiration)
 	claims := &JWTClaim{
 		Email:    email,
 		Username: username,
@@ -29,7 +29,7 @@ func GenerateJWT(email string, username string) (tokenString string, err error) 
 	return
 }
 
-func ValidateToken(signedToken string) (err error) {
+func ValidateToken(signedToken string) (*jwt.Token, error) {
 	token, err := jwt.ParseWithClaims(
 		signedToken,
 		&JWTClaim{},
@@ -38,16 +38,26 @@ func ValidateToken(signedToken string) (err error) {
 		},
 	)
 	if err != nil {
-		return
+		return nil, err
 	}
 	claims, ok := token.Claims.(*JWTClaim)
 	if !ok {
 		err = errors.New("couldn't parse claims")
-		return
+		return nil, err
 	}
 	if claims.ExpiresAt < time.Now().Local().Unix() {
 		err = errors.New("token expired")
+		return nil, err
+	}
+
+	return token, nil
+}
+
+func GenerateTokenPair(email string, username string) (accessToken string, refreshToken string, err error) {
+	accessToken, err = GenerateJWT(email, username, 1*time.Hour)
+	if err != nil {
 		return
 	}
+	refreshToken, err = GenerateJWT(email, username, 2*time.Hour)
 	return
 }

@@ -24,6 +24,7 @@ func initRouter() *gin.Engine {
 		{
 			auth.POST("/login", controllers.GenerateToken)
 			auth.POST("/register", controllers.RegisterUser)
+			auth.POST("/refresh-token", controllers.RefreshToken)
 		}
 		
 		secured := api.Group("").Use(middlewares.Auth())
