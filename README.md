@@ -14,7 +14,7 @@ This is heavily inspired by this blog post [JWT Authentication in Golang](https:
 
 ## Available Requests
 
-### `POST /api/user/register`
+### `POST /api/v1/auth/register`
 
 **Body**
 
@@ -42,10 +42,10 @@ This is heavily inspired by this blog post [JWT Authentication in Golang](https:
 ```bash
 curl -X POST -H "Content-Type: application/json" \
 -d '{"name": "Test User", "email": "me@example.com", "username": "test.user", "password": "change!M3"}' \
-http://localhost:8080/api/user/register
+http://localhost:8080/api/v1/auth/register
 ```
 
-### `POST /api/token`
+### `POST /api/v1/auth/login`
 
 **Body**
 
@@ -69,10 +69,10 @@ http://localhost:8080/api/user/register
 ```bash
 curl -X POST -H "Content-Type: application/json" \
 -d '{"email": "me@example.com", "password": "change!M3"}' \
-http://localhost:8080/api/token
+http://localhost:8080/api/v1/auth/login
 ```
 
-### `GET /api/secured/ping`
+### `GET /api/v1/ping`
 
 **Response**
 
@@ -87,5 +87,5 @@ http://localhost:8080/api/token
 ```bash
 curl -X GET -H "Content-Type: application/json" \
 -H "Authorization: Bearer --jwt--" \
-http://localhost:8080/api/secured/ping
+http://localhost:8080/api/v1/ping
 ```
