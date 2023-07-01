@@ -6,7 +6,7 @@ This example project shows and example implementation of JWT authentication in G
 
 Under the hood, the project uses [GORM](https://gorm.io/) as ORM and [Gin](https://github.com/gin-gonic/gin).
 
-This is a companion project for the blog post: [JWT Authentication in Golang](https://codewithmukesh.com/blog/jwt-authentication-in-golang/)
+This is heavily inspired by this blog post [JWT Authentication in Golang](https://codewithmukesh.com/blog/jwt-authentication-in-golang/) and an example of [how to use binary UUIDs with GORM](https://github.com/dipeshdulal/binary-uuid-gorm). 
 
 **Missing Features**
 
