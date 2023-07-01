@@ -1,12 +1,26 @@
 package models
 
 import (
+	"github.com/cngJo/golang-api-auth/internal/binary_uuid"
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
-type User struct {
+type BaseModel struct {
 	gorm.Model
+	ID binary_uuid.BinaryUUID `gorm:"primary_key;type:uuid" json:"id"`
+}
+
+func (base *BaseModel) BeforeCreate(tx *gorm.DB) (err error) {
+	uuid, err := uuid.NewRandom()
+	base.ID = binary_uuid.BinaryUUID(uuid)
+
+	return err
+}
+
+type User struct {
+	BaseModel
 	Name     string `json:"name"`
 	Username string `json:"username" gorm:"unique"`
 	Email    string `json:"email" gorm:"unique"`
