@@ -3,6 +3,7 @@ package controllers
 import (
 	"github.com/cngJo/golang-api-auth/auth"
 	"github.com/cngJo/golang-api-auth/database"
+	"github.com/cngJo/golang-api-auth/internal/fingerprint"
 	"github.com/cngJo/golang-api-auth/models"
 	"github.com/gin-gonic/gin"
 )
@@ -15,6 +16,7 @@ type TokenRequest struct {
 func GenerateToken(context *gin.Context) {
 	var request TokenRequest
 	var user models.User
+	var refreshToken models.RefreshToken
 
 	if err := context.ShouldBindJSON(&request); err != nil {
 		context.JSON(400, gin.H{"error": err.Error()})
@@ -35,14 +37,22 @@ func GenerateToken(context *gin.Context) {
 		return
 	}
 
-	accessToken, refreshToken, err := auth.GenerateTokenPair(user.Email, user.Username)
+	accessTokenString, refreshTokenString, err := auth.GenerateTokenPair(user)
 	if err != nil {
 		context.JSON(500, gin.H{"error": "Error generating token"})
 		context.Abort()
 		return
 	}
 
-	context.JSON(200, gin.H{"access_token": accessToken, "refresh_token": refreshToken})
+	refreshTokenFingerprint, _ := fingerprint.GenerateFinderprint()
+	refreshToken = models.RefreshToken{Token: refreshTokenString, User: user, Fingerprint: refreshTokenFingerprint}
+
+	database.Instance.Create(&refreshToken)
+
+	// TODO: Proper cookie configuration
+	context.SetCookie("fingerprint", refreshTokenFingerprint, 3600, "/", "localhost", false, true)
+
+	context.JSON(200, gin.H{"access_token": accessTokenString, "refresh_token": refreshTokenString})
 }
 
 type RefreshTokenRequest struct {
@@ -50,6 +60,10 @@ type RefreshTokenRequest struct {
 }
 
 func RefreshToken(context *gin.Context) {
+	// Load refresh token from finderprint
+	// Invalidate refresh token
+	// Generate and stor enew token pair
+	// Set new finderpint in cookie
 	var request RefreshTokenRequest
 
 	if err := context.ShouldBindJSON(&request); err != nil {
@@ -73,8 +87,17 @@ func RefreshToken(context *gin.Context) {
 		return
 	}
 
+	user, ok := context.Get("user")
+	if !ok {
+		context.JSON(401, gin.H{"error": "Invalid token"})
+		context.Abort()
+		return
+	}
+
+	user = models.User(user)
+
 	// Generate new access token with the same claims
-	accessToken, refreshToken, err := auth.GenerateTokenPair(claims.Email, claims.Username)
+	accessToken, refreshToken, err := auth.GenerateTokenPair(user)
 	if err != nil {
 		context.JSON(500, gin.H{"error": "Error generating token"})
 		context.Abort()

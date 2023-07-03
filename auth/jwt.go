@@ -4,7 +4,9 @@ import (
 	"errors"
 	"time"
 
+	"github.com/cngJo/golang-api-auth/models"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/google/uuid"
 )
 
 var jwtKey = []byte("my_secret_key")
@@ -53,11 +55,20 @@ func ValidateToken(signedToken string) (*jwt.Token, error) {
 	return token, nil
 }
 
-func GenerateTokenPair(email string, username string) (accessToken string, refreshToken string, err error) {
-	accessToken, err = GenerateJWT(email, username, 1*time.Hour)
+func GenerateRefreshToken() (string, error) {
+	uuid, err := uuid.NewRandom()
+	if err != nil {
+		return "", err
+	}
+
+	return uuid.String(), nil
+}
+
+func GenerateTokenPair(user models.User) (accessToken string, refreshToken string, err error) {
+	accessToken, err = GenerateJWT(user.Email, user.Username, 1*time.Hour)
 	if err != nil {
 		return
 	}
-	refreshToken, err = GenerateJWT(email, username, 2*time.Hour)
+	refreshToken, err = GenerateRefreshToken()
 	return
 }

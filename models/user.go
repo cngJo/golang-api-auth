@@ -43,3 +43,10 @@ func (user *User) CheckPassword(password string) error {
 	}
 	return nil
 }
+
+type RefreshToken struct {
+	BaseModel
+	User        User
+	Fingerprint string
+	Token       string
+}
